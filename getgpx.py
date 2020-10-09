@@ -1,11 +1,6 @@
 import gpxpy
-# from directions import get_name
-from google import get_name
 
-file = open('09_27_20.gpx', 'r')
-list = gpxpy.parse(file)
-
-class puntos:#class that holds info of one point. The idea is create an array of this object.
+class Puntos:#class that holds info of one point. The idea is create an array of this object.
     def __init__(self,lat, long, elev, time):
         self.__lat = lat
         self.__long = long
@@ -24,18 +19,15 @@ class puntos:#class that holds info of one point. The idea is create an array of
     def get_time(self):
         return self.__time
 
-position = []
+#it creates an array of Puntos and return an array with all the coordinates in the gpx file.
+def get_points(parseado):
+    contador = 0
+    position = []
 
-contador = 0
-for track in list.tracks:
-    for segment in track.segments:
-        for point in segment.points:
-            position.append(puntos(point.latitude, point.longitude, point.elevation, point.time))
-            contador+=1
+    for track in parseado.tracks:
+        for segment in track.segments:
+            for point in segment.points:
+                position.append(Puntos(point.latitude, point.longitude, point.elevation, point.time))
+                contador+=1
 
-# for testing
-# for i in range(0,18000,1000):
-#     print(get_name(position[i].get_lat(), position[i].get_long(), "or" , key))ß
-# print all the points lat and long
-for i in range(0,1000, 5):
-    print('{0} -> Lat/Long: {1},{2} Time: {3} --> Street: {4}'.format(i, position[i].get_lat(), position[i].get_long(), position[i].get_time(), get_name(position[i].get_lat(), position[i].get_long(), )))
+    return position
