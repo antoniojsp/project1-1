@@ -1,5 +1,6 @@
 from math import cos, sin, asin, radians, sqrt
 #calculates distance between two points using the harvestein formula for spheric shapes.
+
 def distance(ini_lat, ini_lon, fin_lat, fin_lon):
 
 	dif_lat = radians(ini_lat) - radians(fin_lat)
