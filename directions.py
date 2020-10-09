@@ -1,24 +1,25 @@
 import requests
 import configparser
 config = configparser.ConfigParser()
-config.read("credentials.ini")
+config.read("credentials.ini")#save key outside repository
 
-# location = [44.587662,-123.256691]
-def get_name_tamu(lat, long, state):
-    origen = "http://geoservices.tamu.edu/Services/ReverseGeocoding/WebService/v04_01/Rest/?lat=" + str(lat) + "&lon=" + str(long) + "&state=" + str(state) + "&apikey=" + config["DEFAULT"]["key_tamu"] + "&format=json&notStore=false&version=4.10"#service provided by tamu.
+#location = [44.587471,-123.260834]
 
-    answer = ""#storage only the name of the street.
-    response = requests.get(origen).json()
-    result = response['StreetAddresses'][0]['StreetAddress']#only gets the address of the avenue or street
-    # print(response)
+def get_name_tamu(lat, long):
+    endpoint = "https://geoservices.tamu.edu/Services/ReverseGeocoding/WebService/v04_01/Rest/"#service
+    data = {'apiKey':config["DEFAULT"]["key_tamu"],#parameters
+            'lat':lat,
+            'lon':long,
+            'format':'json',
+            'notStore':'false',
+            'version':'4.10'}
+
+    respuesta = requests.get(url = endpoint, data = data)#request
+    response = respuesta.json()#transform to json
+    result = response['StreetAddresses'][0]['StreetAddress'].split()#only gets the address of the avenue or street
     # remove the addres number, leaving only the street or avenue name.
-    signal = 0
-    for i in result:
-        if i == ' ':#exeption if the name of the street has numbers i.e 19th avenue, Eugene
-            signal = 1
-        if i not in "0123456789" or signal == 1:#deletes the first numbers house. i.e. 1790 Alder St. is converted to Alder St.
-            answer += i
+    result.pop(0)#remove house number
+    return ' '.join(result)#transform list to string
 
-    return answer[1:]
 
-# print(get_name_tamu(location[0],location[1],"or"))
+#print(get_name_tamu(location[0],location[1]))
