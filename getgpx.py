@@ -5,7 +5,7 @@ from google import get_name
 file = open('09_27_20.gpx', 'r')
 list = gpxpy.parse(file)
 
-class puntos:
+class puntos:#class that holds info of one point. The idea is create an array of this object.
     def __init__(self,lat, long, elev, time):
         self.__lat = lat
         self.__long = long
@@ -32,8 +32,6 @@ for track in list.tracks:
         for point in segment.points:
             position.append(puntos(point.latitude, point.longitude, point.elevation, point.time))
             contador+=1
-
-key = "bf20a5bb85774b0c9e9b7b319c92040f"
 
 # for testing
 # for i in range(0,18000,1000):
