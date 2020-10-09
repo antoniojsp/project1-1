@@ -14,7 +14,7 @@ final_lon = -123.080187
 
 file = open('09_27_20.gpx', 'r')
 parseado = gpxpy.parse(file)
-#test
+#test distancia
 print ("{:.2f} meters".format(distance(inicio_lat, inicio_lon, final_lat, final_lon)))
 
 position = get_points(parseado)
