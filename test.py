@@ -15,6 +15,8 @@ result_distance3 = 732.37
 example4 = [ 44.077009, -123.047404, 44.063810,-123.048803]#1474.25 meters north and south
 result_distance4 = 1474.25
 
+test_skip = [44.604942,-123.262184,44.60498,-123.262192]
+
 delta = 10.0 #tolerence in distance 10 meteres plus or less
 #test distancia
 print ("{:.2f} meters".format(distance(example1[0], example1[1], example1[2], example1[3])))
@@ -25,6 +27,9 @@ print ("{:.2f} meters".format(distance(example3[0], example3[1], example3[2], ex
 assert_almost_equal(distance(example3[0], example3[1], example3[2], example3[3]),result_distance3, delta=delta)
 print ("{:.2f} meters".format(distance(example4[0], example4[1], example4[2], example4[3])))
 assert_almost_equal(distance(example4[0], example4[1], example4[2], example4[3]),result_distance4, delta=delta)
+# print ("skip {:.2f} meters".format(distance(test_skip[0], test_skip[1], test_skip[2], test_skip[3])))
+# assert_almost_equal(,result_distance5, delta=delta)
+print(distance(test_skip[0], test_skip[1], test_skip[2], test_skip[3]))
 
 #test create object Points, create array and storage in memory all the points.
 file = open('09_27_20.gpx', 'r')
@@ -32,5 +37,5 @@ parseado = gpxpy.parse(file)
 position = get_points(parseado)#array of objects that hold information like lat, long, elev, time.
 
 #test gpx
-for i in range(9000,18000, 35):
+for i in range(690,710):
     print('{0} -> Lat/Long: {1},{2}--> Street: {3}'.format(i, position[i].get_lat(), position[i].get_long(), get_name_google(position[i].get_lat(), position[i].get_long())))
