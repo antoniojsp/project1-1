@@ -37,5 +37,5 @@ parseado = gpxpy.parse(file)
 position = get_points(parseado)#array of objects that hold information like lat, long, elev, time.
 
 #test gpx
-for i in range(690,710):
+for i in range(40,1000,50):
     print('{0} -> Lat/Long: {1},{2}--> Street: {3}'.format(i, position[i].get_lat(), position[i].get_long(), get_name_google(position[i].get_lat(), position[i].get_long())))
