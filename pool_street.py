@@ -19,7 +19,7 @@ end = 200#last point
 print("Start: {} End:{}".format(start,end))#debug
 
 pool = [""]*len(position)#cache to reduce the number of requests
-print(len(pool))
+# print(len(pool))
 
 def change(list, start, end, storage):#list with all
     middle = int((start+end)/2)
@@ -32,7 +32,7 @@ def change(list, start, end, storage):#list with all
             pool[i] = async_result.get()
 
     # if pool[start] == "":
-    #     async_result = pool1.apply_async(get_name_google, (list[start].get_lat(), list[start].get_long()),)
+    #     async_result = pool1.apply_async(get_name_google, (list[start].get_lat(), list[start].get_long()))
     #     pool[start] = async_result.get()
     # if pool[middle] == "":
     #     async_result1 = pool1.apply_async(get_name_google, (list[middle].get_lat(), list[middle].get_long()))
@@ -46,16 +46,20 @@ def change(list, start, end, storage):#list with all
 
     elif (pool[start] == pool[middle] and  pool[middle] != pool[end]) or (pool[start] != pool[middle] and  pool[middle] == pool[end]):
 
-        parts2 = [middle+1, middle+1]
+        parts2 = [middle-1, middle+1]
 
-        for i in parts2:
-            if pool[i] == "":
-                async_result = pool1.apply_async(get_name_google, (list[i].get_lat(), list[i].get_long()))
-                pool[i] = async_result.get()
+        for j in parts2:
+            if pool[j] == "":
+                async_result = pool1.apply_async(get_name_google, (list[j].get_lat(), list[j].get_long()))
+                pool[j] = async_result.get()
 
         # if pool[middle-1] == "":
         #     async_result4 = pool1.apply_async(get_name_google, (list[middle-1].get_lat(), list[middle-1].get_long()))
         #     pool[middle-1] = async_result4.get()
+        #
+        # if pool[middle+1] == "":
+        #     async_result3 = pool1.apply_async(get_name_google, (list[middle+1].get_lat(), list[middle+1].get_long()))
+        #     pool[middle+1] = async_result3.get()
 
         if pool[middle] != pool[middle-1] or pool[middle] != pool[middle+1]:
             if len(storage) == 0:
