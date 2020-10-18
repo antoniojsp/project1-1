@@ -4,6 +4,7 @@ from distance import distance
 import gpxpy
 import time
 
+#FINDS THE TURNING POINTS, IT RETURNS THE NAMES AND THE NUMBER OF THE INDEX WHERE THE TURNS ARE.
 from multiprocessing.pool import ThreadPool#multi process
 
 start_time = time.time()#record time
@@ -22,30 +23,39 @@ print(len(pool))
 
 def change(list, start, end, storage):#list with all
     middle = int((start+end)/2)
-
+    parts = [start, middle, end]
     pool1 = ThreadPool(processes=1)
 
-    if pool[start] == "":
-        async_result = pool1.apply_async(get_name_google, (list[start].get_lat(), list[start].get_long()),)
-        pool[start] = async_result.get()
-    if pool[middle] == "":
-        async_result1 = pool1.apply_async(get_name_google, (list[middle].get_lat(), list[middle].get_long()))
-        pool[middle] = async_result1.get()
-    if pool[end] == "":
-        async_result2 = pool1.apply_async(get_name_google, (list[end].get_lat(), list[end].get_long()))
-        pool[end] = async_result2.get()
+    for i in parts:
+        if pool[i] == "":
+            async_result = pool1.apply_async(get_name_google, (list[i].get_lat(), list[i].get_long()),)
+            pool[i] = async_result.get()
+
+    # if pool[start] == "":
+    #     async_result = pool1.apply_async(get_name_google, (list[start].get_lat(), list[start].get_long()),)
+    #     pool[start] = async_result.get()
+    # if pool[middle] == "":
+    #     async_result1 = pool1.apply_async(get_name_google, (list[middle].get_lat(), list[middle].get_long()))
+    #     pool[middle] = async_result1.get()
+    # if pool[end] == "":
+    #     async_result2 = pool1.apply_async(get_name_google, (list[end].get_lat(), list[end].get_long()))
+    #     pool[end] = async_result2.get()
 
     if pool[start] == pool[middle] and pool[middle] == pool[end]:
         return
 
     elif (pool[start] == pool[middle] and  pool[middle] != pool[end]) or (pool[start] != pool[middle] and  pool[middle] == pool[end]):
 
-        if pool[middle+1] == "":
-            async_result3 = pool1.apply_async(get_name_google, (list[middle+1].get_lat(), list[middle+1].get_long()))
-            pool[middle+1] = async_result3.get()
-        if pool[middle-1] == "":
-            async_result4 = pool1.apply_async(get_name_google, (list[middle-1].get_lat(), list[middle-1].get_long()))
-            pool[middle-1] = async_result4.get()
+        parts2 = [middle+1, middle+1]
+
+        for i in parts2:
+            if pool[i] == "":
+                async_result = pool1.apply_async(get_name_google, (list[i].get_lat(), list[i].get_long()))
+                pool[i] = async_result.get()
+
+        # if pool[middle-1] == "":
+        #     async_result4 = pool1.apply_async(get_name_google, (list[middle-1].get_lat(), list[middle-1].get_long()))
+        #     pool[middle-1] = async_result4.get()
 
         if pool[middle] != pool[middle-1] or pool[middle] != pool[middle+1]:
             if len(storage) == 0:

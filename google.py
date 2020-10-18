@@ -12,7 +12,7 @@ def get_name_google(lat, long):
     gmaps = googlemaps.Client(key=config["DEFAULT"]["key_google"])
 
     result = gmaps.reverse_geocode((lat, long))
-    
+
     #check for the right name in the json file
     abrev = ["Rd", "Ln", "St", "Ave", "Dr", "Way", "Pl", "Blvd", "Ct", "Terrace", "I-", "Hwy", "Cir", "Aly", "Bldg","Expy", "Fwy", "Gtwy", "Pl", "Ste", "Vw", "Sta"]
 

@@ -1,5 +1,6 @@
 import gpxpy
 
+#I prefer to use a class instead of a dict since allows to extends easily in future if require
 class Puntos:#class that holds info of one point. The idea is create an array of this object.
     def __init__(self,lat, long, elev, time):
         self.__lat = lat
