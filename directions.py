@@ -1,3 +1,6 @@
+
+#EXTRACT INFORMATION FROM TAMU. THRE IS TWO VERSIONS, GOOGLE AND TAMU.
+
 import requests
 import configparser
 config = configparser.ConfigParser()
