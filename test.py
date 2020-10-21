@@ -38,12 +38,11 @@ position = get_points(parseado)#array of objects that hold information like lat,
 # print(get_name_google(lat, long))
 
 #set range from where we want to get points.
-start = 2285
-end = 2305
+start = 0
+end = len(position)-1
 #prints points from the gpx or points and names. uncomment to change the result.
-for i in range(start,end,jump):
+for i in range(start,end):
     # print("location{0}= [{1},{2}]".format(i-70, position[i].get_lat(), position[i].get_long()))
     # line.append([position[i].get_lat(), position[i].get_long()])
     print("{0}:  {1},{2}".format(i, position[i].get_lat(), position[i].get_long()))
-    print('{0} -> Lat/Long: {1},{2}--> Street: {3}'.format(i, position[i].get_lat(), position[i].get_long(), get_name_google(position[i].get_lat(), position[i].get_long())))
-print(line)
+    # print('{0} -> Lat/Long: {1},{2}--> Street: {3}'.format(i, position[i].get_lat(), position[i].get_long(), get_name_google(position[i].get_lat(), position[i].get_long())))
