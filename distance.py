@@ -1,3 +1,5 @@
+# takes 2 points, (from, to) and return its distance
+
 from math import cos, sin, asin, radians, sqrt
 #calculates distance between two points using the harvestein formula for spheric shapes.
 
