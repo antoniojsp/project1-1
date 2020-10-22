@@ -18,7 +18,7 @@ start_time = time.time()#record time
 #get the points from the gpx file
 file = open('09_27_20.gpx', 'r')#for testing, it won't be here for final version
 parseado = gpxpy.parse(file)
-list = get_points(parseado)#array of objects that hold information like lat, long, elev, time.
+list = get_points(parseado) #array of objects that hold information like lat, long, elev, time.
 
 #first point and last one that are in the range is verify
 start = 0#first point
@@ -29,7 +29,7 @@ pool = [""]*len(list)#cache to reduce the number of requests, collisions will pr
 
 #I eliminate the class and I am gonna use a 2d array instead.
 intersection = []
-
+#helper
 def points(parts):#extract points, get the name address and add the info into the pool array(cache)
 
     thpool = ThreadPool(processes=1)
@@ -40,6 +40,8 @@ def points(parts):#extract points, get the name address and add the info into th
             async_result = thpool.apply_async(get_name_google,(list[i[1]].get_lat(), list[i[1]].get_long()))
             interpolate[i[0]] = async_result.get()#holds more than one request.
             pool[i[1]] = interpolate[i[0]]
+        else:
+            print("collision")
 
 #adding starting point of the whole road
 intersection.append([start, get_name_google(list[start].get_lat(), list[start].get_long()), list[start].get_lat(), list[start].get_long()])
