@@ -7,7 +7,7 @@ import configparser#import the key from secret file
 config = configparser.ConfigParser()
 config.read("credentials.ini")#stored keys outside respository.
 #google version getting name. Uses googlemaps module. and the key is kept secret
-# location = [44.630474,-123.273361]#for testing
+location = [44.587662,-123.256691]#for testing
 
 def get_name_google(lat, long):
 
@@ -22,11 +22,13 @@ def get_name_google(lat, long):
     for i in range(0,5):
         try:
             if any(x in result[i]["address_components"][1]["short_name"] for x in abrev):
+                print(i)
                 full_address = result[i]["address_components"][1]["short_name"]
         except:
+
             full_address = result[1]["address_components"][1]["short_name"]
 
     return full_address
 
-# print(get_name_google(location[0],location[1]))
+print(get_name_google(location[0],location[1]))
 # print("--- %s seconds ---" % (time.time() - start_time))
