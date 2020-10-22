@@ -1,47 +1,56 @@
-from distance import distance
-from directions import get_name_tamu
-from goo import get_name_google
+from distance import *
+from google import get_name_google
 from getgpx import get_points
 from nose.tools import *
 import gpxpy
-
-# #test distance examples
-# example1 = [ 44.588692,-123.268276,44.588787,-123.262550]#  457.48 meters  west east
-# result_distance1 = 457.48
-# example2 = [ 44.578722,-123.283039, 44.575484,-123.277778]#549.37 meters diagonal
-# result_distance2 = 549.37
-# example3 = [ 44.577155, -123.292407, 44.577111,-123.283148]#732.37 metes west east
-# result_distance3 = 732.37
-# example4 = [ 44.077009, -123.047404, 44.063810,-123.048803]#1474.25 meters north and south
-# result_distance4 = 1474.25
-#
-# delta = 10.0 #tolerence in distance 10 meteres plus or less
-# # #test distancia
-# print ("{:.2f} meters".format(distance(example1[0], example1[1], example1[2], example1[3])))
-# assert_almost_equal(distance(example1[0], example1[1], example1[2], example1[3]),result_distance1, delta=delta)
-# print ("{:.2f} meters".format(distance(example2[0], example2[1], example2[2], example2[3])))
-# assert_almost_equal(distance(example2[0], example2[1], example2[2], example2[3]),result_distance2, delta=delta)
-# print ("{:.2f} meters".format(distance(example3[0], example3[1], example3[2], example3[3])))
-# assert_almost_equal(distance(example3[0], example3[1], example3[2], example3[3]),result_distance3, delta=delta)
-# print ("{:.2f} meters".format(distance(example4[0], example4[1], example4[2], example4[3])))
-# assert_almost_equal(distance(example4[0], example4[1], example4[2], example4[3]),result_distance4, delta=delta)
+import math
 
 #test create object Points, create array and storage in memory all the points.
 file = open('09_27_20.gpx', 'r')
 parseado = gpxpy.parse(file)
 position = get_points(parseado)#array of objects that hold information like lat, long, elev, time.
 
-import math
 
 def getAngle(a, b, c):
     ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
     return ang + 360 if ang < 0 else ang
 
-list = [0,88,124,574,663,704,1148,1208,1223,1256,1260,1292,1294,1328]
+list = [0,88,123,125,127,574,663,663,704,1148,1260,1292,1294,1364,1431,1435,1722,2230,2296,2404,3445,3731,4593,5045,5168,5315,5742,6552,6603,6614,6890,8689,8826,8829,8850,8900,8919,8923,8936,8959,9044,9152,9187,9283,9762,9902,9906,10004,10014,10032,10049,10193,10336,10344,10344,10347,10362,10480,10488,10488,10511,11484,12123,12346,12606,12633,13709,13781,13911,13925,13959,13997,14027,14033,14060,14930,14974,15074,15124,15217,15345,16078,16432,16437,16463,17226,17310,17370,17443,17513,17548,17800,18031,18034,18042,18087,18103,18105,18109,18114,18122,18122,18126,18210,18231,18317,18374]
 
-for i in range(1,len(list)-1):
-    print(list[i])
-    print(getAngle((position[list[i]-15].get_lat(),position[list[i]-15].get_long()), (position[list[i]].get_lat(),position[list[i]].get_long()), ( position[list[i]+105].get_lat(),position[list[i]+15].get_long())))
+rango = 20
+# for i in list:
+#     print("{},{}".format(position[i].get_lat(),position[i].get_long()))
+result = []
+result.append([])
+for i in list:
+    print("{},{}".format(position[i].get_lat(),position[i].get_long()))
+
+print(len(list))
+for i in range(0,len(list)-1):
+    degres = getAngle((position[list[i]-rango].get_lat(),position[list[i]-rango].get_long()), (position[list[i]].get_lat(),position[list[i]].get_long()), ( position[list[i]+rango].get_lat(),position[list[i]+rango].get_long()))
+
+    if degres < 120.0 or degres > 240.0:
+        if degres < 180:
+            direction = "Left"
+        else:
+            direction = "Right"
+        meters = route_distance(list[i],list[i+1])
+        print("{} {}".format(list[i],list[i+1]))
+        result.append([[list[i]],[degres],[direction],[meters],[position[list[i]].get_lat()],[position[list[i]].get_long()],[]])
+
+
+    # result.append(get_name_google(position[list[i]].get_lat(), position[list[i]].get_long()))
+# for i in range(0,len(list)-2):
+#     meters = route_distance(list[i],list[i+1])
+#     result[i].append(meters)
+#
+# for i in result:
+#     # print("{},{}".format(i[0],i[0]))
+#     print("{},{}".format(i[3],i[4]))
+
+
+
+    # print("{}:   {} - > {},{} ->{}".format(direction, degres,position[list[i]].get_lat(),position[list[i]].get_long(), get_name_google(position[list[i]].get_lat(), position[list[i]].get_long())))
 
 #
 # print(getAngle((44.587662,-123.256691), (44.58762,-123.256981), ( 44.587589,-123.257622)))
