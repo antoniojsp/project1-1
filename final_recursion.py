@@ -43,9 +43,10 @@ def points(parts):#extract points, get the name address and add the info into th
         else:
             print("collision")
 
+
+
 #adding starting point of the whole road
 intersection.append([start, get_name_google(list[start].get_lat(), list[start].get_long()), list[start].get_lat(), list[start].get_long()])
-
 def change(start, end, storage):#list contains all the points, start first point, end last one and storage saves the results.
     middle = int((start+end)/2)
 
@@ -77,7 +78,7 @@ def change(start, end, storage):#list contains all the points, start first point
         #checks when start, middle and end are different but the middle falls exactly in a changing point. it will perform the checking and add the point if it falls in the changing point.
         if pool[middle-1] != pool[middle]:
             storage.append([middle-1, pool[middle-1], list[middle-1].get_lat(), list[middle-1].get_long()])
-        elif list[middle] != list[middle+1]:
+        elif pool[middle] != pool[middle+1]:
             storage.append([middle, pool[middle], list[middle].get_lat(), list[middle].get_long()])
         #will continue dividing and searching.
         change(start, middle, storage)
@@ -85,20 +86,8 @@ def change(start, end, storage):#list contains all the points, start first point
 
 #calling fuction, returns one list of array, "intersectation" is an array that contains the results.
 change(start, end, intersection)
-
 #adding ending point
 intersection.append([end, get_name_google(list[end].get_lat(), list[end].get_long()), list[end].get_lat(), list[end].get_long()])
-
-#prints contain of the pool array for debugging
-# print([pool[i] for i in range(start,end)])
-# j = 0
-# for i in pool:
-#     if i != "":
-#         j+=1
-# print(j)
-# print(len(intersection))
-
-#sorts the results by index (let's us know what point comes before and after)
 intersection.sort(key=lambda x: x[0])#sort order
 
 #print results
