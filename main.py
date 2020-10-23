@@ -20,10 +20,6 @@ start = 0
 end = len(list)-2
 points = Route(list, size)
 
-points.add_point(0)
-points.change(start, end)
-points.add_point(end+1)
-
 resultado = points.result()
 
 
