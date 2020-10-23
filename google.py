@@ -1,7 +1,7 @@
 import googlemaps
 import json
 import time
-start_time = time.time()
+# start_time = time.time()
 
 import configparser#import the key from secret file
 config = configparser.ConfigParser()
