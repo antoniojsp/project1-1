@@ -12,7 +12,6 @@ import gpxpy
 import math
 from math import cos, sin, asin, radians, sqrt
 
-
 # from distance import distance
 from multiprocessing.pool import ThreadPool#multi process
 # import threading
@@ -30,13 +29,15 @@ class Route:
 
     def request(self,parts):#extract points, get the name address and add the info into the pool array(cache)
         thpool = ThreadPool(processes=1)#running concurrently
-        interpolate = [""]*3
+        interpolate = [""]*len(parts)# can request a list of requests.
 
         for i in parts:
             if self.__pool[i[1]] == "":#if the data is in the cache array, it will not request the data but use the one from the pool array
                 async_result = thpool.apply_async(get_name_google,(self.__arr[i[1]].get_lat(), self.__arr[i[1]].get_long()))
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
+
+    
 
     def add_point(self, index):#for the first and last point:
         self.__storage.append([index, get_name_google(self.__arr[index].get_lat(), self.__arr[index].get_long()), self.__arr[index].get_lat(), self.__arr[index].get_long()])
