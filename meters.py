@@ -30,4 +30,4 @@ def route_distance(start, end):
     return segment
 
 #test
-print("{:0.2f}".format(route_distance(100,115)))
+# print("{:0.2f}".format(route_distance(100,115)))
