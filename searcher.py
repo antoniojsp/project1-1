@@ -15,24 +15,21 @@ from math import cos, sin, asin, radians, sqrt
 
 # from distance import distance
 from multiprocessing.pool import ThreadPool#multi process
-# import gpxpy
-# import time
 # import threading
-#
 # from multiprocessing import Process#to run concurrently.
 
-
+#Class will return 2d array with the result of the route
 class Route:
 
     def __init__(self, list):
         self.__arr = []#The points from the gpx live here.
         for i in list:
-            self.__arr.append(i)
+            self.__arr.append(i)#filling up __arr with the points from the gpx file
         self.__pool = [""]*len(list)#cache to reduce the number of requests, collisions will prevent requesting more data.
-        self.__storage = []
+        self.__storage = []#partial results go here.
 
     def request(self,parts):#extract points, get the name address and add the info into the pool array(cache)
-        thpool = ThreadPool(processes=1)
+        thpool = ThreadPool(processes=1)#running concurrently
         interpolate = [""]*3
 
         for i in parts:
@@ -41,11 +38,9 @@ class Route:
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
 
-    def add_point(self, index):#for the one and last point:
+    def add_point(self, index):#for the first and last point:
         self.__storage.append([index, get_name_google(self.__arr[index].get_lat(), self.__arr[index].get_long()), self.__arr[index].get_lat(), self.__arr[index].get_long()])
 
-    #adding starting point of the whole road
-    # intersection.append([start, get_name_google(list[start].get_lat(), list[start].get_long()), list[start].get_lat(), list[start].get_long()])
     def change(self, start, end):#list contains all the points, start first point, end last one and storage saves the results.
         middle = int((start+end)/2)
 
@@ -83,63 +78,45 @@ class Route:
             self.change(start, middle)
             self.change(middle+1, end)
 
-    #calling fuction, returns one list of array, "intersectation" is an array that contains the results.
-    # change(start, end, intersection)
-    #adding ending point
-    # intersection.append([end, get_name_google(list[end].get_lat(), list[end].get_long()), list[end].get_lat(), list[end].get_long()]
-    def get_angle(self, before, center, after):
-        ang = math.degrees(math.atan2(after[1]-center[1], after[0]-after[0]) - math.atan2(before[1]-center[1], before[0]-center[0]))
-        result = ang + 360 if ang < 0 else ang
-        return result
+    #from math formula
+    # def get_angle(self, before, center, after):
+    #     ang = math.degrees(math.atan2(after[1]-center[1], after[0]-after[0]) - math.atan2(before[1]-center[1], before[0]-center[0]))
+    #     result = ang + 360 if ang < 0 else ang
+    #     return result
 
-
+    #rolls through the index from one point to another and add up the distances betweeen those points.
     def route_distance(self, start, end):
         segment = 0
         for i in range(start, end):
             segment+=distance(self.__arr[i].get_lat(), self.__arr[i].get_long(), self.__arr[i+1].get_lat(), self.__arr[i+1].get_long())
         return segment
 
-    # def detect_turn(self, input):
-    #     rango = 20
-    #     degres = 0
-    #     for i in range(1,len(list)-1):
-    #         degres = getAngle((self.__arr[input[i]-rango].get_lat(),self.__arr[input[i]-rango].get_long()), (self.__arr[input[i]].get_lat(),self.__arr[list[i]].get_long()), ( self.__arr[input[i]+rango].get_lat(),self.__arr[list[i]+rango].get_long()))
-    #
-    #         direction = ""
-    #
-    #         if degres< 130.0 or degres > 220.0:
-    #             if degres < 180:
-    #                 direction = "Left"
-    #             else:
-    #                 direction = "Right"
-    #
-    #             print("{}:   {} - > {},{} ->{}".format(direction, degres,position[self.__arr[i]].get_lat(),position[self.__arr[i]].get_long(), get_name_google(position[self.__arr[i]].get_lat(), position[self.__arr[i]].get_long())))
 
     def direction(self,input):#array of indexes
 
-        result = []
+        result = []#holds all the information
         turn = ""
         rango = 20
-        result.append([])
+        result.append([])#2d array to hold addreses, distance, turning, index
         for i in range(0,len(input)-1):
             degree = 0
             if i == 0:
                 degree = 180
             else:
+                #get_angle needs 3 list arguments to figure out the angle of the turn to detect if it goes right or left.
                 a = [self.__arr[input[i]-rango].get_lat(), self.__arr[input[i]-rango].get_long()]
                 b = [self.__arr[input[i]].get_lat(), self.__arr[input[i]].get_long()]
                 c = [self.__arr[input[i]+rango].get_lat(), self.__arr[input[i]+rango].get_long()]
                 degree = self.get_angle(a,b,c)
 
+            #if angle lower of 130 and higher than 240, we could assume that is a turn
+            #this function use as an input, one array of index with those possible turning points.
+            #using this range, we can detect the falses positives
             if degree < 130 or degree > 240 or i == 0:
-                # print(route_distance(input[i], input[i+1]))
-                # print("{}: {},{} = {}".format(degree, position[input[i]].get_lat(), position[input[i]].get_long(),get_name_google(position[input[i]].get_lat(),position[input[i]].get_long())))
                 if degree >240:
                     turn = "Right"
-                    # print("right")
                 if degree <130:
                     turn = "Left"
-                    # print("left")
 
                 meters = self.route_distance(input[i], input[i+1])
 
@@ -147,17 +124,17 @@ class Route:
 
         return result
 
+    #it rolls through the array and add distances from one index to another. Those indexes are the turning points and we assume that belongs to the same street
+    # def route_distance(self,start, end):
+    # 	segment = 0
+    # 	for i in range(start,end):
+    # 		segment+=self.distance(self.__arr [i].get_lat(), self.__arr [i].get_long(), self.__arr [i+1].get_lat(), self.__arr [i+1].get_long())
+    # 	return segment
 
-    def route_distance(self,start, end):
-    	segment = 0
-    	for i in range(start,end):
-    		segment+=self.distance(self.__arr [i].get_lat(), self.__arr [i].get_long(), self.__arr [i+1].get_lat(), self.__arr [i+1].get_long())
-    	return segment
-
+    #get angle
     def get_angle(self,a, b, c):
-
-        ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
-        return ang + 360 if ang < 0 else ang
+        angular = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
+        return angular + 360 if angular < 0 else angular
 
     def distance(self,ini_lat, ini_lon, fin_lat, fin_lon):
     	dif_lat = radians(ini_lat) - radians(fin_lat)
@@ -172,7 +149,7 @@ class Route:
         self.add_point(0)
         end = len(self.__arr)-2
         self.change(0, end)
-        self.add_point(end+1)
+        self.add_point(end+1)#add first and last points to indicate the start and the end
         self.__storage.sort(key=lambda x: x[0])#sort order
 
         # print(self.__storage)
@@ -190,12 +167,6 @@ class Route:
                 j+=1
             i+=1
 
-        final = self.direction(index)
+        final = self.direction(index)#put things everything together.
 
         return final
-
-#print results
-# for i in intersection:
-#     print("{}\n ".format(i))
-#
-# print("--- %s seconds ---" % (time.time() - start_time))

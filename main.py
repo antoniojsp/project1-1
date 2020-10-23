@@ -19,6 +19,9 @@ points = Route(list)
 
 resultado = points.result()
 
-print(resultado)
+for i in resultado:
+    print(i)
+
+# print(resultado)
 
 print("--- %s seconds ---" % (time.time() - start_time))
