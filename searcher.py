@@ -37,10 +37,14 @@ class Route:
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
 
-    
 
     def add_point(self, index):#for the first and last point:
         self.__storage.append([index, get_name_google(self.__arr[index].get_lat(), self.__arr[index].get_long()), self.__arr[index].get_lat(), self.__arr[index].get_long()])
+
+    #experimental
+    def add_point_storage(self, index, move = 0):#it allows storage info in certain index position and, if it need it, move it to left of the right.
+        self.__storage.append([index + move, self.__pool[index + move], self.__arr[index + move].get_lat(), self.__arr[index + move].get_long()])
+
 
     def change(self, start, end):#list contains all the points, start first point, end last one and storage saves the results.
         middle = int((start+end)/2)
