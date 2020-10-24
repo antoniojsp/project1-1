@@ -38,46 +38,43 @@ class Route:
                 async_result = thpool.apply_async(get_name_google,(self.__arr[i[1]].get_lat(), self.__arr[i[1]].get_long()))
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
-        print()
+        
 
     def __add_point(self, index):#for the first and last point:
-        self.__storage.append([index, get_name_google(self.__arr[index].get_lat(), self.__arr[index].get_long()), self.__arr[index].get_lat(), self.__arr[index].get_long()])
+        self.__storage.append(index)
 
     def __change(self, start, end):#list contains all the points, start first point, end last one and storage saves the results.
         middle = int((start+end)/2)
         parts1 = [[0,start],[1,middle],[2,end]]
         self.__request(parts1)
-        print("entrada")
         # base case: when  the start, the middle and the end is the same.
         if self.__pool[start] == self.__pool[middle] and self.__pool[middle] == self.__pool[end]:
             return
 
         # when start and middle are equal and middle and end not equal(or viceverse), possible indication of a point of change.
         if (self.__pool[start] == self.__pool[middle] and  self.__pool[middle] != self.__pool[end]) or (self.__pool[start] != self.__pool[middle] and  self.__pool[middle] == self.__pool[end]):
-            print("uno raro")
             parts2 = [[0,middle+1], [1,middle-1]]
             self.__request(parts2)
 
             #checks if the next point from the middle is different, if it is, change detected and added.
             if  self.__pool[middle-1] != self.__pool[middle]:
-                self.__storage.append([middle+1, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
+                self.__storage.append(middle)
             elif self.__pool[start] != self.__pool[middle]:
                 self.__change(start, middle)
 
             if self.__pool[middle] != self.__pool[middle+1]:
-                self.__storage.append([middle+1, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
+                self.__storage.append(middle+1)
             elif self.__pool[middle] != self.__pool[end]:
                 self.__change(middle, end)
 
         else:
             parts3 = [[0,middle+1], [1,middle-1]]
             self.__request(parts3)
-            print("3 raros")
             if self.__pool[middle-1] != self.__pool[middle]:
-                self.__storage.append([middle, self.__pool[middle], self.__arr[middle].get_lat(), self.__arr[middle].get_long()])
+                self.__storage.append(middle)
 
             elif self.__pool[middle] != self.__pool[middle+1]:
-                self.__storage.append([middle, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
+                self.__storage.append(middle)
             #will continue dividing and searching.
 
             self.__change(start, middle)
@@ -89,7 +86,7 @@ class Route:
             segment+=self.__distance(self.__arr[i].get_lat(), self.__arr[i].get_long(), self.__arr[i+1].get_lat(), self.__arr[i+1].get_long())
         return segment
 
-    def __direction(self,input):#array of indexes
+    def __direction(self):#array of indexes
         result = []#holds all the information
         turn = ""
         rango = 20
@@ -98,14 +95,14 @@ class Route:
         meters_list = []
 
         result.append([])#2d array to hold addreses, distance, turning, index
-        for i in range(0,len(input)-1):
+        for i in range(0,len(self.__storage)-1):
             degree = 0
             if i == 0:
                 degree = 180
             else:
-                a = [self.__arr[input[i]-rango].get_lat(), self.__arr[input[i]-rango].get_long()]
-                b = [self.__arr[input[i]].get_lat(), self.__arr[input[i]].get_long()]
-                c = [self.__arr[input[i]+rango].get_lat(), self.__arr[input[i]+rango].get_long()]
+                a = [self.__arr[self.__storage[i]-rango].get_lat(), self.__arr[self.__storage[i]-rango].get_long()]
+                b = [self.__arr[self.__storage[i]].get_lat(), self.__arr[self.__storage[i]].get_long()]
+                c = [self.__arr[self.__storage[i]+rango].get_lat(), self.__arr[self.__storage[i]+rango].get_long()]
                 degree = self.__get_angle(a,b,c)
 
             if degree < 130 or degree > 240 or i == 0:
@@ -116,7 +113,7 @@ class Route:
                 elif degree <130:
                     turn = "Left"
 
-            passed.append(input[i])
+            passed.append(self.__storage[i])
             turn_list.append(turn)
 
         size = len(passed)
@@ -147,23 +144,12 @@ class Route:
 
     def result(self):
         self.__add_point(0)
-        end = len(self.__arr)-1
+        self.__end = 499
         self.__change(0,500)
-        self.__add_point(end)#add first and last points to indicate the start and the end
-        self.__storage.sort(key=lambda x: x[0])#sort order
-        print(len(self.__storage))
-        print(self.__pool)
         print(self.__storage)
+        self.__add_point(self.__end)#add first and last points to
+        list.sort(self.__storage)# indicate the start and the end
 
-        i = 0
-        index = []
-        while i < len(self.__storage)-1:
-            j=0
-            while j < len(self.__storage[i])-1:
-                if j == 0:
-                    index.append(self.__storage[i][0])
-                j+=1
-            i+=1
-        final = self.__direction(index)#put things everything together.
+        final = self.__direction()#put things everything together.
 
         return final
