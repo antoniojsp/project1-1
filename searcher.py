@@ -141,14 +141,14 @@ class Route:
     	return distancia
 
 
-    def result(self):
+    def result(self,start,end):
         self.__add_point(0)
-        self.__end = 499
-        self.__change(0,500)
-        print(self.__pool)
+        self.__end = end#random for testing
+        self.__change(start,end)
+        # print(self.__pool)
         self.__add_point(self.__end)#add first and last points to
         list.sort(self.__storage)# indicate the start and the end
-        print(self.__storage)
+        # print(self.__storage)
         final = self.__direction()#put things everything together.
 
         return final

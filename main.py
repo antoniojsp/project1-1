@@ -17,11 +17,25 @@ parseado = gpxpy.parse(file)
 list = get_points(parseado) #array of objects that hold information like lat, long, elev, time.
 points = Route(list)
 print(len(list))
-resultado = points.result()
+# resultado = points.result(0, 100)
 
-for i in resultado:
+
+thpool = ThreadPool(processes=1)#running concurrently
+
+async_result = thpool.apply_async(points.result,(0,250))
+lista1 = async_result.get()#holds more than one request.
+
+async_result = thpool.apply_async(points.result,(251,500))
+lista2 = async_result.get()#holds more than one request.
+
+for i in lista1:
     print(i)
 
-# print(resultado)
+for j in lista2:
+    print(j)
+# lista3 = lista1 + lista2
+#
+# lista3.sort()
+# print(lista3)
 
 print("--- %s seconds ---" % (time.time() - start_time))
