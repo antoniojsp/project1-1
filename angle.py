@@ -1,6 +1,4 @@
 import math
-#function that calculate the angle of three points.
-
 
 def get_angle(a, b, c):
 

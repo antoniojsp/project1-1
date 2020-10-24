@@ -15,19 +15,17 @@ list = [0,88,123,125,127,574,663,663,704, 1148,1260,1292,1294,1364,1431,1435,172
 
 rango = 20
 
-result = []
-result.append([])
-
-def slope(loc1,loc2):
-    slope = loc1[1]-loc2[1]/float(loc1[0]-loc2[0])
-    return slope
 
 def direction(input):
 
+    rango = 20#how far left and right
     result = []
     turn = ""
+    passed = []###
+    meters_list = []
+    turn_list = []
 
-    result.append([])
+    print(len(input))
     for i in range(0,len(input)-1):
         degree = 0
         if i == 0:
@@ -38,27 +36,31 @@ def direction(input):
             c = [position[input[i]+rango].get_lat(), position[input[i]+rango].get_long()]
             degree = get_angle(a,b,c)
 
-        if degree < 130 or degree > 240 or i == 0:
-            # print(route_distance(input[i], input[i+1]))
-            # print("{}: {},{} = {}".format(degree, position[input[i]].get_lat(), position[input[i]].get_long(),get_name_google(position[input[i]].get_lat(),position[input[i]].get_long())))
+        if degree < 130.0 or degree > 240.0 or i == 0:
+            if i == 0:
+                turn = "Start"
             if degree >240:
                 turn = "Right"
-                # print("right")
-            if degree <130:
+            elif degree <130:
                 turn = "Left"
-                # print("left")
 
-            meters = route_distance(list[i], list[i+1])
+            passed.append(input[i])
+            turn_list.append(turn)
 
-            result.append([input[i], turn, meters, get_name_google(position[input[i]].get_lat(), position[input[i]].get_long()), position[input[i]].get_lat(), position[input[i]].get_long()])
+    size = len(passed)
+    for i in range(0,size-1):
+        temp = passed[i]
+        temp1= passed[i+1]
+        meters = route_distance(temp, temp1)
+        result.append([temp, turn_list[i], meters, position[temp].get_lat(), position[temp].get_long()])
 
+    ending = passed[size-1]
+    result.append([size-1, passed[size-1] , "End", 0, position[ending].get_lat(), position[ending].get_long()])
     return result
 
 
 
 answer = direction(list)
-# 
-# for i in answer:
-#     print(i[0])
 
-print(answer)
+for i in answer:
+    print(i)

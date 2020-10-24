@@ -25,119 +25,118 @@ class Route:
         for i in list:
             self.__arr.append(i)#filling up __arr with the points from the gpx file
         self.__pool = [""]*len(list)#cache to reduce the number of requests, collisions will prevent requesting more data.
-        self.__storage = []#partial results go here.
+        self.__storage =[]#partial results go here.
+        self.__end = 0
 
-    def request(self,parts):#extract points, get the name address and add the info into the pool array(cache)
+    def __request(self,parts):#extract points, get the name address and add the info into the pool array(cache)
         thpool = ThreadPool(processes=1)#running concurrently
         interpolate = [""]*len(parts)# can request a list of requests.
-
+        print(parts)
         for i in parts:
             if self.__pool[i[1]] == "":#if the data is in the cache array, it will not request the data but use the one from the pool array
+                # print(i[1])
                 async_result = thpool.apply_async(get_name_google,(self.__arr[i[1]].get_lat(), self.__arr[i[1]].get_long()))
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
+        print()
 
-    
-
-    def add_point(self, index):#for the first and last point:
+    def __add_point(self, index):#for the first and last point:
         self.__storage.append([index, get_name_google(self.__arr[index].get_lat(), self.__arr[index].get_long()), self.__arr[index].get_lat(), self.__arr[index].get_long()])
 
-    def change(self, start, end):#list contains all the points, start first point, end last one and storage saves the results.
+    def __change(self, start, end):#list contains all the points, start first point, end last one and storage saves the results.
         middle = int((start+end)/2)
-
         parts1 = [[0,start],[1,middle],[2,end]]
-        self.request(parts1)
-
+        self.__request(parts1)
+        print("entrada")
         # base case: when  the start, the middle and the end is the same.
         if self.__pool[start] == self.__pool[middle] and self.__pool[middle] == self.__pool[end]:
             return
 
         # when start and middle are equal and middle and end not equal(or viceverse), possible indication of a point of change.
         if (self.__pool[start] == self.__pool[middle] and  self.__pool[middle] != self.__pool[end]) or (self.__pool[start] != self.__pool[middle] and  self.__pool[middle] == self.__pool[end]):
-
+            print("uno raro")
             parts2 = [[0,middle+1], [1,middle-1]]
-            self.request(parts2)
+            self.__request(parts2)
 
             #checks if the next point from the middle is different, if it is, change detected and added.
             if  self.__pool[middle-1] != self.__pool[middle]:
-                self.__storage.append([middle-1, self.__pool[middle-1], self.__arr[middle-1].get_lat(), self.__arr[middle-1].get_long()])
-            elif self.__pool[middle] != self.__pool[middle+1]:
-                self.__storage.append([middle, self.__pool[middle], self.__arr[middle].get_lat(), self.__arr[middle].get_long()])
-            else:
-                self.change(start, middle)
-                self.change(middle+1, end)
+                self.__storage.append([middle+1, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
+            elif self.__pool[start] != self.__pool[middle]:
+                self.__change(start, middle)
+
+            if self.__pool[middle] != self.__pool[middle+1]:
+                self.__storage.append([middle+1, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
+            elif self.__pool[middle] != self.__pool[end]:
+                self.__change(middle, end)
 
         else:
             parts3 = [[0,middle+1], [1,middle-1]]
-            self.request(parts3)
-            #checks when start, middle and end are different but the middle falls exactly in a changing point. it will perform the checking and add the point if it falls in the changing point.
+            self.__request(parts3)
+            print("3 raros")
             if self.__pool[middle-1] != self.__pool[middle]:
-                self.__storage.append([middle-1, self.__pool[middle-1], self.__arr[middle-1].get_lat(), self.__arr[middle-1].get_long()])
-            elif self.__pool[middle] != self.__pool[middle+1]:
                 self.__storage.append([middle, self.__pool[middle], self.__arr[middle].get_lat(), self.__arr[middle].get_long()])
+
+            elif self.__pool[middle] != self.__pool[middle+1]:
+                self.__storage.append([middle, self.__pool[middle+1], self.__arr[middle+1].get_lat(), self.__arr[middle+1].get_long()])
             #will continue dividing and searching.
-            self.change(start, middle)
-            self.change(middle+1, end)
 
-    #from math formula
-    # def get_angle(self, before, center, after):
-    #     ang = math.degrees(math.atan2(after[1]-center[1], after[0]-after[0]) - math.atan2(before[1]-center[1], before[0]-center[0]))
-    #     result = ang + 360 if ang < 0 else ang
-    #     return result
+            self.__change(start, middle)
+            self.__change(middle+1, end)
 
-    #rolls through the index from one point to another and add up the distances betweeen those points.
-    def route_distance(self, start, end):
+    def __route_distance(self, start, end):
         segment = 0
         for i in range(start, end):
-            segment+=distance(self.__arr[i].get_lat(), self.__arr[i].get_long(), self.__arr[i+1].get_lat(), self.__arr[i+1].get_long())
+            segment+=self.__distance(self.__arr[i].get_lat(), self.__arr[i].get_long(), self.__arr[i+1].get_lat(), self.__arr[i+1].get_long())
         return segment
 
-
-    def direction(self,input):#array of indexes
-
+    def __direction(self,input):#array of indexes
         result = []#holds all the information
         turn = ""
         rango = 20
+        passed = []###
+        turn_list = []
+        meters_list = []
+
         result.append([])#2d array to hold addreses, distance, turning, index
         for i in range(0,len(input)-1):
             degree = 0
             if i == 0:
                 degree = 180
             else:
-                #get_angle needs 3 list arguments to figure out the angle of the turn to detect if it goes right or left.
                 a = [self.__arr[input[i]-rango].get_lat(), self.__arr[input[i]-rango].get_long()]
                 b = [self.__arr[input[i]].get_lat(), self.__arr[input[i]].get_long()]
                 c = [self.__arr[input[i]+rango].get_lat(), self.__arr[input[i]+rango].get_long()]
-                degree = self.get_angle(a,b,c)
+                degree = self.__get_angle(a,b,c)
 
-            #if angle lower of 130 and higher than 240, we could assume that is a turn
-            #this function use as an input, one array of index with those possible turning points.
-            #using this range, we can detect the falses positives
             if degree < 130 or degree > 240 or i == 0:
+                if i == 0:
+                    turn = "Start"
                 if degree >240:
                     turn = "Right"
-                if degree <130:
+                elif degree <130:
                     turn = "Left"
 
-                meters = self.route_distance(input[i], input[i+1])
+            passed.append(input[i])
+            turn_list.append(turn)
 
-                result.append([input[i], turn, meters, get_name_google( self.__arr[input[i]].get_lat(), self.__arr[input[i]].get_long()), self.__arr[input[i]].get_lat(), self.__arr[input[i]].get_long() ])
+        size = len(passed)
+        for i in range(0,size-1):
+            temp = passed[i]
+            temp1= passed[i+1]
+            meters = self.__route_distance(temp, temp1)
 
+            result.append([temp, turn_list[i], meters, self.__pool[temp], self.__arr[temp].get_lat(), self.__arr[temp].get_long()])
+
+        ending = passed[size-1]
+        result.append([ending, "End", 0, self.__pool[ending], self.__arr[ending].get_lat(), self.__arr[ending].get_long()])
         return result
 
-    #it rolls through the array and add distances from one index to another. Those indexes are the turning points and we assume that belongs to the same street
-    # def route_distance(self,start, end):
-    # 	segment = 0
-    # 	for i in range(start,end):
-    # 		segment+=self.distance(self.__arr [i].get_lat(), self.__arr [i].get_long(), self.__arr [i+1].get_lat(), self.__arr [i+1].get_long())
-    # 	return segment
-
-    #get angle
-    def get_angle(self,a, b, c):
+    def __get_angle(self,a, b, c):
         angular = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
+
         return angular + 360 if angular < 0 else angular
 
-    def distance(self,ini_lat, ini_lon, fin_lat, fin_lon):
+    def __distance(self,ini_lat, ini_lon, fin_lat, fin_lon):
     	dif_lat = radians(ini_lat) - radians(fin_lat)
     	dif_lon = radians(ini_lon) - radians(fin_lon)
     	earth_radio = 6371 #radius in km
@@ -147,13 +146,14 @@ class Route:
 
 
     def result(self):
-        self.add_point(0)
-        end = len(self.__arr)-2
-        self.change(0, end)
-        self.add_point(end+1)#add first and last points to indicate the start and the end
+        self.__add_point(0)
+        end = len(self.__arr)-1
+        self.__change(0,500)
+        self.__add_point(end)#add first and last points to indicate the start and the end
         self.__storage.sort(key=lambda x: x[0])#sort order
-
-        # print(self.__storage)
+        print(len(self.__storage))
+        print(self.__pool)
+        print(self.__storage)
 
         i = 0
         index = []
@@ -161,13 +161,9 @@ class Route:
             j=0
             while j < len(self.__storage[i])-1:
                 if j == 0:
-                    try:
-                        index.append(self.__storage[i][j])
-                    except:
-                        pass
+                    index.append(self.__storage[i][0])
                 j+=1
             i+=1
-
-        final = self.direction(index)#put things everything together.
+        final = self.__direction(index)#put things everything together.
 
         return final

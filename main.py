@@ -16,7 +16,7 @@ file = open('09_27_20.gpx', 'r')#for testing, it won't be here for final version
 parseado = gpxpy.parse(file)
 list = get_points(parseado) #array of objects that hold information like lat, long, elev, time.
 points = Route(list)
-
+print(len(list))
 resultado = points.result()
 
 for i in resultado:
