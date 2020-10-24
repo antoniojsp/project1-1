@@ -31,14 +31,13 @@ class Route:
     def __request(self,parts):#extract points, get the name address and add the info into the pool array(cache)
         thpool = ThreadPool(processes=1)#running concurrently
         interpolate = [""]*len(parts)# can request a list of requests.
-        print(parts)
         for i in parts:
             if self.__pool[i[1]] == "":#if the data is in the cache array, it will not request the data but use the one from the pool array
                 # print(i[1])
                 async_result = thpool.apply_async(get_name_google,(self.__arr[i[1]].get_lat(), self.__arr[i[1]].get_long()))
                 interpolate[i[0]] = async_result.get()#holds more than one request.
                 self.__pool[i[1]] = interpolate[i[0]]
-        
+
 
     def __add_point(self, index):#for the first and last point:
         self.__storage.append(index)
@@ -146,10 +145,10 @@ class Route:
         self.__add_point(0)
         self.__end = 499
         self.__change(0,500)
-        print(self.__storage)
+        print(self.__pool)
         self.__add_point(self.__end)#add first and last points to
         list.sort(self.__storage)# indicate the start and the end
-
+        print(self.__storage)
         final = self.__direction()#put things everything together.
 
         return final
